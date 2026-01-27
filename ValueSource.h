@@ -10,8 +10,6 @@
 #include <type_traits>
 #include "Logger.h"
 
-using storageAlignment = std::max_align_t;
-
 enum class ValueType : uint16_t {
     EMPTY = 0,
     INT32 = 1,
@@ -30,10 +28,11 @@ constexpr const char *typeToString(const ValueType t) {
     }
 }
 
+#pragma pack(push, 1)
 class ValueSource {
-private:
+protected:
     ValueType type = ValueType::EMPTY;
-    alignas(storageAlignment) uint8_t data[16]{};
+    uint8_t data[16]{};
 
 public:
     ValueSource() = default;
@@ -47,24 +46,23 @@ public:
                       "Invalid type");
         static_assert(sizeof(T) <= 16, "Value too big for 16-byte buffer");
 
-        if constexpr (std::is_same_v<T, int32_t>) {
-            type = ValueType::INT32;
-        } else if constexpr (std::is_same_v<T, uint16_t>) {
-            type = ValueType::UINT16;
-        } else if constexpr (std::is_same_v<T, float>) {
-            type = ValueType::FLOAT;
-        }
+        if constexpr (std::is_same_v<T, int32_t>) type = ValueType::INT32;
+        else if constexpr (std::is_same_v<T, uint16_t>) type = ValueType::UINT16;
+        else if constexpr (std::is_same_v<T, float>) type = ValueType::FLOAT;
+
         std::memcpy(data, &value, sizeof(T));
     }
 
     //String pack
-    void pack(const char *value) {
+    void packString(const char *src) {
         type = ValueType::STRING;
-        if (std::strlen(value) >= 16) {
+        size_t len = std::strlen(src);
+        if (len >= 16) {
             Logger::log(LogLevel::WARNING, "String too long for 16-byte buffer. Truncating...");
+            len = 15;
         }
-        std::strncpy(reinterpret_cast<char *>(data), value, 15);
-        data[15] = '\0';
+        std::memcpy(data, src, len);
+        data[len] = '\0';
     }
 
     template<typename T>
@@ -88,4 +86,7 @@ public:
 
     ValueType getType() const { return type; }
 };
+#pragma pack(pop)
+
+static_assert(sizeof(ValueSource) == 18, "ValueSource must be exactly 18 bytes");
 #endif //SMARTDRIVE_VALUESOURCE_H

@@ -5,4 +5,6 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_executable(SmartDrive main.cpp
         ValueSource.h
-        Logger.h)
+        Logger.h
+        Command.h
+        DataTypes.h)

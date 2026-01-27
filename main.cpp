@@ -13,7 +13,7 @@ int main() {
     vs.pack(10);
     std::cout << "Type: " << typeToString(vs.getType()) << " Value: " << vs.unpack<float>() << std::endl;
 
-    vs.pack("ROBOT_01");
+    vs.packString("1234567890123456789");
     if (vs.getType() == ValueType::STRING) {
         std::cout << "Type: string Value: " << vs.unpackString() << std::endl;
     }
