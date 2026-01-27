@@ -1,0 +1,21 @@
+#include <iostream>
+#include "ValueSource.h"
+
+void pcLogHandler(LogLevel level, const char *message) {
+    const char* label = (level == LogLevel::WARNING) ? "[WARN]: ": "[LOG] ";
+    std::cout << label << message << std::endl;
+}
+
+int main() {
+    Logger::setCallback(pcLogHandler);
+    ValueSource vs;
+
+    vs.pack(10);
+    std::cout << "Type: " << typeToString(vs.getType()) << " Value: " << vs.unpack<float>() << std::endl;
+
+    vs.pack("ROBOT_01");
+    if (vs.getType() == ValueType::STRING) {
+        std::cout << "Type: string Value: " << vs.unpackString() << std::endl;
+    }
+    return 0;
+}

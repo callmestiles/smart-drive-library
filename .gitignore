@@ -1,0 +1,104 @@
+############################
+# C++ Build Artifacts
+############################
+
+# Object files
+*.o
+*.obj
+*.lo
+*.slo
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Libraries
+*.a
+*.lib
+*.so
+*.dll
+*.dylib
+
+
+############################
+# CMake
+############################
+
+# Build directories
+build/
+build-*/
+cmake-build-*/
+
+# Generated CMake files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
+
+
+############################
+# CLion / JetBrains
+############################
+
+.idea/
+*.iml
+
+
+############################
+# Debug / Profiling
+############################
+
+*.dSYM/
+*.su
+*.idb
+*.pdb
+gmon.out
+perf.data
+perf.data.old
+
+
+############################
+# Logs & Temp Files
+############################
+
+*.log
+*.tmp
+*.swp
+*.swo
+*~
+
+
+############################
+# OS Junk
+############################
+
+# macOS
+.DS_Store
+
+# Linux
+.nfs*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+
+############################
+# Dependency Managers (optional)
+############################
+
+# vcpkg
+vcpkg_installed/
+
+# Conan
+.conan/
+
+
+############################
+# Generated / Distribution
+############################
+
+generated/
+dist/
