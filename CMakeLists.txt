@@ -7,4 +7,6 @@ add_executable(SmartDrive main.cpp
         ValueSource.h
         Logger.h
         Command.h
-        DataTypes.h)
+        Config.h
+        RobotData.h
+)

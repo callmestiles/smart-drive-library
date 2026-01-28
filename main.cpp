@@ -10,7 +10,7 @@ int main() {
     Logger::setCallback(pcLogHandler);
     ValueSource vs;
 
-    vs.pack(10);
+    vs.pack<int32_t>(10);
     std::cout << "Type: " << typeToString(vs.getType()) << " Value: " << vs.unpack<float>() << std::endl;
 
     vs.packString("1234567890123456789");

@@ -2,8 +2,8 @@
 // Created by dunamis on 27/01/2026.
 //
 
-#ifndef SMARTDRIVE_DATATYPES_H
-#define SMARTDRIVE_DATATYPES_H
+#ifndef SMARTDRIVE_ROBOTDATA_H
+#define SMARTDRIVE_ROBOTDATA_H
 
 #include <cstdint>
 #include "ValueSource.h"
@@ -20,4 +20,4 @@ struct TelemetryData : public ValueSource {
 #pragma pack(pop)
 
 static_assert(sizeof(TelemetryData) == 24, "TelemetryData must be exactly 24 bytes");
-#endif //SMARTDRIVE_DATATYPES_H
+#endif //SMARTDRIVE_ROBOTDATA_H

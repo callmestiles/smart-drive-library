@@ -55,10 +55,14 @@ public:
 
     //String pack
     void packString(const char *src) {
+        if (!src) {
+            clear();
+            return;
+        }
         type = ValueType::STRING;
         size_t len = std::strlen(src);
         if (len >= 16) {
-            Logger::log(LogLevel::WARNING, "String too long for 16-byte buffer. Truncating...");
+            LOG(LogLevel::WARNING, "String truncated to 15 chars + null");
             len = 15;
         }
         std::memcpy(data, src, len);
@@ -83,6 +87,11 @@ public:
     }
 
     const char *unpackString() const { return reinterpret_cast<const char *>(data); }
+
+    void clear() {
+        type = ValueType::EMPTY;
+        std::memset(data, 0, sizeof(data));
+    }
 
     ValueType getType() const { return type; }
 };
