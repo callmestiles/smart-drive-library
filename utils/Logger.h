@@ -5,7 +5,7 @@
 #ifndef SMARTDRIVE_LOGGER_H
 #define SMARTDRIVE_LOGGER_H
 
-#include "Config.h"
+#include "../Config.h"
 
 enum class LogLevel {
     DEBUG,
