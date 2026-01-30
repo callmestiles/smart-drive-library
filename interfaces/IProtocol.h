@@ -6,14 +6,15 @@
 #define SMARTDRIVE_IPROTOCOL_H
 
 #include <cstdint>
+#include "../constants/ProtocolConstants.h"
 #include "../types/ProtocolTypes.h"
 #include "../types/RobotData.h"
 
 struct SerializedData {
-    static constexpr size_t MAX_SIZE = 256 + 6;
-    uint8_t data[MAX_SIZE];
+    uint8_t data[ProtocolConstants::MAX_FRAME_SIZE];
     size_t size = 0;
 };
+
 class IProtocol {
 public:
     virtual ~IProtocol() = default;

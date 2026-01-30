@@ -11,22 +11,6 @@
 #include "../types/RobotData.h"
 #include "../utils/Logger.h"
 
-
-namespace ProtocolConstants {
-    constexpr uint8_t STX = 0x02;
-    constexpr uint16_t MAX_PAYLOAD_SIZE = 256;
-    constexpr uint16_t PROTOCOL_OVERHEAD = 6; //STX(1) + TYPE(1) + LENGTH(2) + CRC(2)
-    constexpr uint16_t MAX_FRAME_SIZE = MAX_PAYLOAD_SIZE + PROTOCOL_OVERHEAD;
-
-    enum class FrameType : uint8_t {
-        COMMAND = 0x01,
-        DISCOVERY = 0x02,
-        TELEMETRY = 0x03,
-        SETTINGS = 0x04,
-        VALUE_SOURCE = 0x05
-    };
-}
-
 class BinaryProtocol : public IProtocol {
 private:
     uint8_t frameBuffer[ProtocolConstants::MAX_FRAME_SIZE];
@@ -38,7 +22,7 @@ private:
             crc ^= static_cast<uint16_t>(data[i]) << 8;
 
             for (uint8_t bit = 0; bit < 8; ++bit) {
-                if (crc && 0x8000) {
+                if (crc & 0x8000) {
                     crc = (crc << 1) ^ 0x1021;
                 } else {
                     crc <<= 1;
@@ -58,7 +42,7 @@ private:
                (static_cast<uint16_t>(src[1]) << 8);
     }
 
-    static inline writeUint32LE(uint8_t *dest, const uint32_t value) {
+    static inline void  writeUint32LE(uint8_t *dest, const uint32_t value) {
         dest[0] = value & 0xFF;
         dest[1] = (value >> 8) & 0xFF;
         dest[2] = (value >> 16) & 0xFF;
@@ -72,7 +56,7 @@ private:
                (static_cast<uint32_t>(src[3]) << 24);
     }
 
-    size_t buildFrame(ProtocolConstants::FrameType type,
+    size_t buildFrame(const ProtocolConstants::FrameType type,
                       const void *payload,
                       const size_t payloadSize
     ) {
@@ -83,12 +67,9 @@ private:
 
         size_t offset = 0;
 
-        frameBuffer[offset++] = ProtocolConstants::STX;
+        frameBuffer[offset++] = ProtocolConstants::encodeHeader(type);
 
-        frameBuffer[offset++] = static_cast<uint8_t>(type);
-
-        writeUint16LE(&frameBuffer[offset], static_cast<uint16_t>(payloadSize));
-        offset += 2;
+        frameBuffer[offset++] = static_cast<uint8_t>(payloadSize);
 
         memcpy(&frameBuffer[offset], payload, payloadSize);
         offset += payloadSize;
@@ -101,10 +82,10 @@ private:
     }
 
     bool parseFrame(const uint8_t *data,
-                    size_t dataSize,
-                    ProtocolConstants::FrameType expectedType,
+                    const size_t dataSize,
+                    const ProtocolConstants::FrameType expectedType,
                     void *payloadOut,
-                    size_t expectedPayloadSize) const {
+                    const size_t expectedPayloadSize) const {
         if (dataSize < ProtocolConstants::PROTOCOL_OVERHEAD) {
             LOG(LogLevel::ERROR, "Frame too small");
             return false;
@@ -112,22 +93,20 @@ private:
 
         size_t offset = 0;
 
-        if (data[offset++] != ProtocolConstants::STX) {
-            LOG(LogLevel::ERROR, "Invalid STX marker");
+        const uint8_t header = data[offset++];
+        if (!ProtocolConstants::isValidHeader(header)) {
+            LOG(LogLevel::ERROR, "Invalid header");
             return false;
         }
 
-        auto frameType = static_cast<ProtocolConstants::FrameType>(data[offset++]);
-        if (frameType != expectedType) {
+        if (const ProtocolConstants::FrameType frameType = ProtocolConstants::decodeType(header); frameType != expectedType) {
             LOG(LogLevel::ERROR, "Frame type mismatch");
             return false;
         }
 
-        uint16_t payloadLength = readUint16LE(&data[offset]);
-        offset += 2;
+        const uint8_t payloadLength = data[offset++];
 
-        if (dataSize != offset + payloadLength + 2) {
-            //+2 is from the crc
+        if (dataSize != offset + payloadLength + 2) {//+2 is for the crc
             LOG(LogLevel::ERROR, "Invalid frame size");
             return false;
         }
@@ -140,7 +119,7 @@ private:
         const size_t crcOffset = offset + payloadLength;
         const uint16_t receivedCrc = readUint16LE(&data[crcOffset]);
 
-        if (uint16_t calculatedCRC = calculateCRC16(data, crcOffset); receivedCrc != calculatedCRC) {
+        if (const uint16_t calculatedCRC = calculateCRC16(data, crcOffset); receivedCrc != calculatedCRC) {
             LOG(LogLevel::ERROR, "CRC mismatch");
             return false;
         }

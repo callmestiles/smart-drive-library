@@ -11,4 +11,5 @@ add_executable(SmartDrive src/main.cpp
         src/BinaryProtocol.h
         interfaces/IProtocol.h
         types/ProtocolTypes.h
+        constants/ProtocolConstants.h
 )
